@@ -198,6 +198,7 @@ app.post("/GeneralOfficial", (req, res) => {
 
 app.post("/GeneralOfficialDepartment", (req, res) => {
   student_details.fetch_students_details_official_department((results) => {
+    console.log(results)
     res.send(JSON.stringify(results));
   });
 });

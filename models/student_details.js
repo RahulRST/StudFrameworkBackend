@@ -82,7 +82,7 @@ function fetch_students_details_official(callback) {
 }
 function fetch_students_details_official_department(callback) {
   connection.query(
-    "SELECT * FROM `student`.`student_details` GROUP BY `dept` ",
+    "SELECT distinct(dept) FROM `student`.`student_details` ",
     (err, results, fields) => {
       if (err) {
         return callback(false);
@@ -93,7 +93,7 @@ function fetch_students_details_official_department(callback) {
 }
 function fetch_students_details_official_batch(callback) {
   connection.query(
-    "SELECT * FROM `student`.`student_details` GROUP BY `batch` ",
+    "SELECT distinct(batch) FROM `student`.`student_details` ",
     (err, results, fields) => {
       if (err) {
         return callback(false);

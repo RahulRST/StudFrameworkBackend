@@ -110,10 +110,9 @@ function PdComp_Stud_insert(callback) {
     ],
     (err, results, fields) => {
       if (err) {
-        console.log(err);
-        return callback("Not Inserted");
+        return callback({message : "Server Down", code : 500});
       } else {
-        return callback("Inserted");
+        return callback({message : "Success", code : 200});
       }
     }
   );

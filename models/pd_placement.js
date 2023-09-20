@@ -98,14 +98,13 @@ function PdPlace_edit(callback) {
 
 function PdPlace_Stud_insert(callback) {
   connection.query(
-    "INSERT INTO pd_placement(roll_no,aptitude,soft_skills,reasoning,technical_training, verified) VALUES(?,?,?,?,?,?)",
+    "INSERT INTO pd_placement(roll_no,aptitude,soft_skills,reasoning,technical_training) VALUES(?,?,?,?,?)",
     [
       params.StudentDetails,
       params.Aptitude,
       params.Soft,
       params.Reasoning,
       params.Technical,
-      "Pending"
     ],
     (err, results, fields) => {
       if (err) {

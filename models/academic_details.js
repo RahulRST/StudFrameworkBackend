@@ -18,13 +18,10 @@ function insert_academic_details(params, callback) {
       }
       let keys = Object.keys(params);
       var prev_columns = results.map((col) => col.COLUMN_NAME);
-      // console.log(prev_columns);
-      // console.log(keys);
+
       var columns = keys.filter(function (obj) {
         return prev_columns.indexOf(obj) == -1;
       });
-      console.log(columns)
-      // console.log(columns);
       for (var i = 0; i < columns.length; i++) {
         connection.query(
           "ALTER TABLE academics add column " + columns[i] + " varchar(100)",
@@ -59,25 +56,6 @@ function insert_academic_details(params, callback) {
     }
   );
 }
-
-function sample_insert_academic_details(params, callback) {
-  connection.query(
-    "INSERT INTO academics(roll_no,subj_id,cat1,cat2) VALUES (?,?,?,?)",
-    [
-      params.roll_no,
-      params.subj_id,
-      params.cat1.toString(),
-      params.cat2.toString(),
-    ], (err, results, fields) => {
-      if (err) {
-        console.log(err); 
-      }
-      console.log(results);
-      return callback(results);
-    }
-  )
-}
-
 function fetch_academic_columns(callback) {
   connection.query(
     "SELECT * FROM INFORMATION_SCHEMA.COLUMNS where TABLE_NAME='academics'",
@@ -85,7 +63,6 @@ function fetch_academic_columns(callback) {
       if (err) {
         console.log(err);
       }
-      console.log(results);
       return callback(results);
     }
   );
@@ -93,7 +70,7 @@ function fetch_academic_columns(callback) {
 
 function fetch_academic_details_official(callback) {
   connection.query(
-    "SELECT * from student_details where student_details.roll_no in (SELECT distinct(academics.roll_no) from academics inner join student_details on academics.roll_no=student_details.roll_no) ",
+    "SELECT * from academics inner join student_details on academics.roll_no=student_details.roll_no ",
     (err, results, fields) => {
       if (err) {
         return callback(false);
@@ -103,12 +80,12 @@ function fetch_academic_details_official(callback) {
   );
 }
 function fetch_academic_details_hod(params, callback) {
-  // console.log(params);
   connection.query(
-    "SELECT * from student_details where student_details.roll_no in (SELECT distinct(academics.roll_no) from academics inner join student_details on academics.roll_no=student_details.roll_no where student_details.dept=?)",
+    "SELECT distinct(academics.roll_no),sname,reg_no,batch,licet_email from academics inner join student_details on academics.roll_no=student_details.roll_no where student_details.dept=?",
     [params.department],
     (err, results, fields) => {
       if (err) {
+        console.log(err);
         return callback(false);
       }
       return callback(results);
@@ -117,7 +94,7 @@ function fetch_academic_details_hod(params, callback) {
 }
 function fetch_academic_details_classadvisor(params, callback) {
   connection.query(
-    "SELECT * from student_details where student_details.roll_no in (SELECT distinct(academics.roll_no) from academics inner join student_details on academics.roll_no=student_details.roll_no where student_details.batch=?)",
+    "SELECT distinct(academics.roll_no),student_details.sname,student_details.reg_no,student_details.batch,student_details.licet_email from academics inner join student_details on academics.roll_no=student_details.roll_no where student_details.batch=? ORDER BY student_details.sname asc",
     [params.batch],
     (err, results, fields) => {
       if (err) {
@@ -172,7 +149,6 @@ function fetch_academic_values(params, callback) {
       if (err) {
         return callback(false);
       } else {
-        console.log(results);
         return callback(results);
       }
     }
@@ -187,7 +163,21 @@ function fetch_academic_summary_record(params, callback) {
       if (err) {
         return callback(false);
       } else {
-        // console.log(results);
+        return callback(results);
+      }
+    }
+  );
+}
+
+function get_credits_student(params, callback) {
+  connection.query(
+    "SELECT sum(credits) as total from (SELECT credits,roll_no from pd_workshops union all SELECT credits,roll_no from pd_webinar union all SELECT credits,roll_no from pd_aptitude UNION ALL SELECT credits,roll_no from pd_competitions UNION all SELECT credits,roll_no from pd_courses UNION ALL SELECT credits,roll_no from pd_employability_skill UNION all SELECT credits,roll_no from pd_final_project UNION ALL SELECT credits,roll_no from pd_final_project UNION ALL SELECT credits,roll_no from pd_guest_lecture UNION all SELECT credits,roll_no from pd_inplant_training UNION ALL SELECT credits,roll_no from pd_internship UNION all SELECT credits,roll_no from pd_mini_project UNION ALL SELECT credits,roll_no from pd_motivational_talk UNION all SELECT credits,roll_no from pd_other_projects UNION all SELECT credits,roll_no from pd_publications UNION ALL SELECT credits,roll_no from pd_skillrack UNION ALL SELECT credits,roll_no from pd_soft_skill UNION ALL SELECT credits,roll_no from pd_system_discovery) as t1  where t1.roll_no = ? GROUP BY t1.roll_no",
+    [params.StudentDetails],
+    (err, results, fields) => {
+      if (err) {
+        console.log(err);
+        return callback(err);
+      } else {
         return callback(results);
       }
     }
@@ -196,7 +186,6 @@ function fetch_academic_summary_record(params, callback) {
 
 module.exports = {
   insert_academic_details: insert_academic_details,
-  sample_insert_academic_details: sample_insert_academic_details,
   fetch_academic_details_official: fetch_academic_details_official,
   fetch_academic_details_hod: fetch_academic_details_hod,
   fetch_academic_details_classadvisor: fetch_academic_details_classadvisor,
@@ -205,4 +194,5 @@ module.exports = {
   fetch_academic_columns: fetch_academic_columns,
   fetch_academic_values: fetch_academic_values,
   fetch_academic_summary_record: fetch_academic_summary_record,
+  get_credits_student: get_credits_student,
 };

@@ -39,10 +39,9 @@ function insert_ec_sports_achv(callback) {
     ],
     (err, results, fields) => {
       if (err) {
-        console.log(err);
-        return callback("NotInserted");
+        return callback({message : "Server Down", code : 500});
       } else {
-        return callback("Inserted");
+        return callback({message : "Success", code : 200});
       }
     }
   );
@@ -55,9 +54,9 @@ function ExtraSport_delete(callback) {
     (err, results, fields) => {
       if (err) {
         console.log(err);
-        return callback(false);
+        return callback("Delete failed");
       } else {
-        return callback(results);
+        return callback("Deleted Successfully");
       }
     }
   );
@@ -77,9 +76,9 @@ function ExtraSport_edit(callback) {
     (err, results, fields) => {
       if (err) {
         console.log(err);
-        return callback(false);
+        return callback("Edit failed");
       } else {
-        return callback(results);
+        return callback("Edited Successfully");
       }
     }
   );
@@ -92,9 +91,9 @@ function ExtraSport_verify(callback) {
     (err, results, fields) => {
       if (err) {
         console.log(err);
-        return callback(false);
+        return callback("Verification failed");
       } else {
-        return callback(results);
+        return callback("Verified Successfully");
       }
     }
   );

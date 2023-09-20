@@ -1,44 +1,33 @@
 const connection = require("../config/dbconfig");
 
 function ExtracurricularCA_display(params, callback) {
-  connection.query(
-    "SELECT * from student_details where roll_no in (SELECT DISTINCT(e_a.roll_no) from ec_club_activity as e_a inner join ec_culturals as e_c_a on e_a.roll_no = e_c_a.roll_no inner join ec_outreach as e_o_a on e_c_a.roll_no = e_o_a.roll_no inner join ec_sports on ec_sports.roll_no = e_o_a.roll_no) and dept=? and batch=?",
-    [params.dept, params.batch],
-    (err, results, fields) => {
-      if (err) {
-        return callback(false);
-      } else {
-        return callback(results);
+  if (params.batch != "None") {
+    connection.query(
+      "SELECT * from student_details where (student_details.roll_no in (SELECT DISTINCT(roll_no) from ec_club_activity) or student_details.roll_no in (SELECT DISTINCT(roll_no) from ec_culturals) or student_details.roll_no in (SELECT DISTINCT(roll_no) from ec_outreach) or student_details.roll_no in (SELECT DISTINCT(roll_no) from ec_sports)) and dept=? and batch=?;",
+      [params.dept, params.batch],
+      (err, results, fields) => {
+        if (err) {
+          console.log(err);
+          return callback(false);
+        } else {
+          return callback(results);
+        }
       }
-    }
-  );
-}
-
-function ExtraCurricularHod_display(params, callback) {
-  connection.query(
-    "SELECT * from student_details where roll_no in (SELECT DISTINCT(e_a.roll_no) from ec_club_activity as e_a inner join ec_culturals as e_c_a on e_a.roll_no = e_c_a.roll_no inner join ec_outreach as e_o_a on e_c_a.roll_no = e_o_a.roll_no inner join ec_sports on ec_sports.roll_no = e_o_a.roll_no) and dept=?",
-    [params.dept],
-    (err, results, fields) => {
-      if (err) {
-        return callback(false);
-      } else {
-        return callback(results);
+    );
+  } else {
+    connection.query(
+      "SELECT * from student_details where (student_details.roll_no in (SELECT DISTINCT(roll_no) from ec_club_activity) or student_details.roll_no in (SELECT DISTINCT(roll_no) from ec_culturals) or student_details.roll_no in (SELECT DISTINCT(roll_no) from ec_outreach) or student_details.roll_no in (SELECT DISTINCT(roll_no) from ec_sports)) and dept=?;",
+      [params.dept],
+      (err, results, fields) => {
+        if (err) {
+          console.log(err);
+          return callback(false);
+        } else {
+          return callback(results);
+        }
       }
-    }
-  );
-}
-
-function ExtraCurricularLICET_display(params, callback) {
-  connection.query(
-    "SELECT * from student_details where roll_no in (SELECT DISTINCT(e_a.roll_no) from ec_club_activity as e_a inner join ec_culturals as e_c_a on e_a.roll_no = e_c_a.roll_no inner join ec_outreach as e_o_a on e_c_a.roll_no = e_o_a.roll_no inner join ec_sports on ec_sports.roll_no = e_o_a.roll_no)",
-    (err, results, fields) => {
-      if (err) {
-        return callback(false);
-      } else {
-        return callback(results);
-      }
-    }
-  );
+    );
+  }
 }
 
 function ExtraClub_Stud_display(callback) {
@@ -90,9 +79,9 @@ function ExtraClub_verify(callback) {
     (err, results, fields) => {
       if (err) {
         console.log(err);
-        return callback(false);
+        return callback("Verification failed");
       } else {
-        return callback(results);
+        return callback("Verified Successfully");
       }
     }
   );
@@ -105,9 +94,9 @@ function ExtraClub_delete(callback) {
     (err, results, fields) => {
       if (err) {
         console.log(err);
-        return callback(false);
+        return callback("Delete failed");
       } else {
-        return callback(results);
+        return callback("Deleted Successfully");
       }
     }
   );
@@ -127,9 +116,9 @@ function ExtraClub_edit(callback) {
     (err, results, fields) => {
       if (err) {
         console.log(err);
-        return callback(false);
+        return callback("Edit failed");
       } else {
-        return callback(results);
+        return callback("Edited Successfully");
       }
     }
   );
@@ -148,10 +137,9 @@ function ExtraClub_Stud_insert(callback) {
     ],
     (err, results, fields) => {
       if (err) {
-        console.log(err);
-        return callback("Not Inserted");
+        return callback({message : "Server Down", code : 500});
       } else {
-        return callback("Inserted");
+        return callback({message : "Success", code : 200});
       }
     }
   );
@@ -162,8 +150,6 @@ module.exports = {
   ExtraClub_Stud_display: ExtraClub_Stud_display,
   ExtracurricularCA_display: ExtracurricularCA_display,
   ExtraCurricular_Stud_display: ExtraCurricular_Stud_display,
-  ExtraCurricularHod_display: ExtraCurricularHod_display,
-  ExtraCurricularLICET_display: ExtraCurricularLICET_display,
   ExtraClub_CA_display: ExtraClub_CA_display,
   ExtraClub_verify: ExtraClub_verify,
   ExtraClub_delete: ExtraClub_delete,

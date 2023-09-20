@@ -7,7 +7,6 @@ const user_login = require("./models/userlogin");
 const change_pass = require("./models/changePass");
 const student_insert = require("./models/student_insert");
 const student_insert_roll = require("./models/student_insert");
-const student_login_insert = require("./models/student_insert");
 const InternationalEx_Stud = require("./models/InternationalEx");
 const InternationalEx_Stud_hod = require("./models/InternationalEx");
 const InternationalEx_Stud_official = require("./models/InternationalEx");
@@ -57,13 +56,44 @@ const pd_placement = require("./models/pd_placement");
 const pd_publications = require("./models/pd_publications");
 const pd_webinars = require("./models/pd_webinars");
 const pd_workshops = require("./models/pd_workshops");
+const pd_aptitude = require("./models/pd_aptitude");
+const pd_sdiscovery = require("./models/pd_sdiscovery");
+const pd_sskills = require("./models/pd_softskill");
+const pd_empskills = require("./models/pd_employability_skill");
 
-require("dotenv").config();
+const bkpd = require("./models/bulkuploadpd");
+
+const admin = require("./models/admin");
+const temp = require("./models/temp");
 
 const academic_details = require("./models/academic_details");
 var cors = require("cors");
 let student_details = require("./models/student_details");
 const charts = require("./models/charts");
+
+const multer = require("multer");
+var path = require("path");
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "models/uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "." + file.originalname); //Appending .xlsx
+  },
+});
+
+var storage1 = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "models/uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "." + file.originalname); //Appending .xlsx
+  },
+});
+
+const upload = multer({ storage: storage });
+const upload1 = multer({ storage: storage1 });
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -74,6 +104,14 @@ app.use(
   })
 );
 app.options("*", cors());
+// var corsMiddleware = function(req, res, next) {
+//   res.header('Access-Control-Allow-Origin', '*'); //replace localhost with actual host
+//   res.header('Access-Control-Allow-Methods', 'OPTIONS, GET, PUT, PATCH, POST, DELETE');
+//   res.header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With,accept,Authorization');
+//   res.header('Access-Control-Allow-Credentials', 'true');
+//   next();
+// }
+// app.use(corsMiddleware);
 
 app.all("/*", function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -81,8 +119,18 @@ app.all("/*", function (req, res, next) {
   next();
 });
 
-// const http = require("http").Server(app);
+const http = require("http").Server(app);
 
+app.post("/temp", (req, res) => {
+  params = req.body;
+  temp.ec(params, (results) => {
+    if (!results) {
+      console.log("error");
+    } else {
+      res.send(results);
+    }
+  });
+});
 
 app.post("/userlogin", (req, res) => {
   params = req.body;
@@ -108,12 +156,11 @@ app.post("/passchange", (req, res) => {
 
 app.post("/studentinsert", (req, res) => {
   params = req.body;
-  console.log(params);
   student_insert.student_insert(params, (results) => {
     if (!results) {
       console.log("error");
     } else {
-      res.send(results);
+      res.status(results.code).send(results.message);
     }
   });
 });
@@ -121,17 +168,6 @@ app.post("/studentinsert", (req, res) => {
 app.post("/insertroll", (req, res) => {
   params = req.body;
   student_insert_roll.student_insert_roll(params, (results) => {
-    if (!results) {
-      console.log("error");
-    } else {
-      res.send(results);
-    }
-  });
-});
-
-app.post("/insertlogin", (req, res) => {
-  params = req.body;
-  student_login_insert.student_login_insert(params, (results) => {
     if (!results) {
       console.log("error");
     } else {
@@ -160,10 +196,20 @@ app.post("/GeneralOfficial", (req, res) => {
   });
 });
 
+app.post("/GeneralOfficialDepartment", (req, res) => {
+  student_details.fetch_students_details_official_department((results) => {
+    res.send(JSON.stringify(results));
+  });
+});
+
+app.post("/GeneralOfficialBatch", (req, res) => {
+  student_details.fetch_students_details_official_batch((results) => {
+    res.send(JSON.stringify(results));
+  });
+});
 app.post("/Academic", (req, res) => {
   params = req.body;
   academic_details.fetch_academic_details_classadvisor(params, (results) => {
-    console.log(results);
     res.send(JSON.stringify(results));
   });
 });
@@ -171,13 +217,11 @@ app.post("/Academic", (req, res) => {
 app.post("/AcademicsData", (req, res) => {
   params = req.body;
   academic_details.fetch_academic_values(params, (results) => {
-    console.log(params);
     res.send(JSON.stringify(results));
   });
 });
 app.post("/AcademicsDataofficial", (req, res) => {
   academic_details.fetch_academic_details_official((results) => {
-    //console.log(results)
     res.send(JSON.stringify(results));
   });
 });
@@ -185,7 +229,6 @@ app.post("/AcademicsDataofficial", (req, res) => {
 app.post("/AcademicsDataHOD", (req, res) => {
   let params = req.body;
   academic_details.fetch_academic_details_hod(params, (results) => {
-    // console.log(results);
     res.send(JSON.stringify(results));
   });
 });
@@ -277,7 +320,7 @@ app.post("/InternationalExposureStudent", (req, res) => {
 app.post("/insertstudinter", (req, res) => {
   params = req.body;
   InternationalEx_Stud_insert.InternationalEx_Stud_insert((results) => {
-    res.send(JSON.stringify(results));
+    res.status(results.code).send(results.message);
   });
 });
 
@@ -318,28 +361,28 @@ app.post("/ExtraCulturalCADisplay", (req, res) => {
 app.post("/insertstudextraclub", (req, res) => {
   params = req.body;
   ExtraClub_Stud_insert.ExtraClub_Stud_insert((results) => {
-    res.send(JSON.stringify(results));
+    res.status(results.code).send(results.message);
   });
 });
 
 app.post("/insertstudextraoutreach", (req, res) => {
   params = req.body;
   ExtraOutreach_Stud_insert.ExtraOutreach_Stud_insert((results) => {
-    res.send(JSON.stringify(results));
+    res.status(results.code).send(results.message);
   });
 });
 
 app.post("/insertstudextrasports", (req, res) => {
   params = req.body;
   insert_ec_sports_achv.insert_ec_sports_achv((results) => {
-    res.send(JSON.stringify(results));
+    res.status(results.code).send(results.message);
   });
 });
 
 app.post("/insertstudextracultural", (req, res) => {
   params = req.body;
   insert_ec_culturals_activity.insert_ec_culturals_activity((results) => {
-    res.send(JSON.stringify(results));
+    res.status(results.code).send(results.message);
   });
 });
 
@@ -353,7 +396,6 @@ app.post("/ExtraOutreachStudentDisplay", (req, res) => {
 app.post("/ExtraSportsStudentDisplay", (req, res) => {
   params = req.body;
   fetch_ec_sports_achv_student.fetch_ec_sports_achv_student((results) => {
-    // console.log(params);
     res.send(JSON.stringify(results));
   });
 });
@@ -405,20 +447,6 @@ app.post("/GeneralDataEdit", (req, res) => {
 app.post("/ExtracurricularCA", (req, res) => {
   params = req.body;
   ExtraClub_Stud_display.ExtracurricularCA_display(params, (results) => {
-    res.send(JSON.stringify(results));
-  });
-});
-
-app.post("/ExtracurricularHOD", (req, res) => {
-  params = req.body;
-  ExtraClub_Stud_display.ExtraCurricularHod_display(params, (results) => {
-    res.send(JSON.stringify(results));
-  });
-});
-
-app.post("/ExtracurricularLICET", (req, res) => {
-  params = req.body;
-  ExtraClub_Stud_display.ExtraCurricularLICET_display(params, (results) => {
     res.send(JSON.stringify(results));
   });
 });
@@ -516,6 +544,20 @@ app.post("/GeneratePlacementCharts", (req, res) => {
   });
 });
 
+app.post("/GenerateAcademicsCharts", (req, res) => {
+  params = req.body;
+  GenerateAcademicsCharts.GenerateAcademicsCharts((results) => {
+    res.send(JSON.stringify(results));
+  });
+});
+
+app.post("/GenerateAcademicSummaryCharts", (req, res) => {
+  params = req.body;
+  GenerateAcademicSummaryCharts.GenerateAcademicSummaryCharts((results) => {
+    res.send(JSON.stringify(results));
+  });
+});
+
 app.post("/getColumnName", (req, res) => {
   params = req.body;
   fetch_academic_columns.fetch_academic_columns((results) => {
@@ -527,7 +569,7 @@ app.post("/getColumnName", (req, res) => {
 app.post("/intern_insert", (req, res) => {
   params = req.body;
   pd_internship.PdIntern_Stud_insert((results) => {
-    res.send(JSON.stringify(results));
+    res.status(results.code).send(results.message);  
   });
 });
 
@@ -612,7 +654,7 @@ app.post("/comp_edit", (req, res) => {
 app.post("/comp_Stud_insert", (req, res) => {
   params = req.body;
   pd_competitions.PdComp_Stud_insert((results) => {
-    res.send(JSON.stringify(results));
+    res.status(results.code).send(results.message);  
   });
 });
 /* --------------------------------------------------------- */
@@ -638,7 +680,7 @@ app.post("/courpd_stud_display", (req, res) => {
 app.post("/Cour_Stud_insert", (req, res) => {
   params = req.body;
   pd_courses.PdCour_Stud_insert((results) => {
-    res.send(JSON.stringify(results));
+    res.status(results.code).send(results.message);  
   });
 });
 app.post("/cour_verify", (req, res) => {
@@ -701,7 +743,7 @@ app.post("/finpro_edit", (req, res) => {
 app.post("/final_stud_insert", (req, res) => {
   params = req.body;
   pd_final_project.PdFinal_Stud_insert((results) => {
-    res.send(JSON.stringify(results));
+    res.status(results.code).send(results.message);  
   });
 });
 /* --------------------------------------------------------- */
@@ -745,7 +787,7 @@ app.post("/guest_edit", (req, res) => {
 app.post("/guest_stud_insert", (req, res) => {
   params = req.body;
   pd_guest_lecture.PdGuest_Stud_insert((results) => {
-    res.send(JSON.stringify(results));
+    res.status(results.code).send(results.message);  
   });
 });
 /* --------------------------------------------------------- */
@@ -789,7 +831,7 @@ app.post("/workshop_edit", (req, res) => {
 app.post("/workshop_stuinsert", (req, res) => {
   params = req.body;
   pd_workshops.PdWork_Stud_insert((results) => {
-    res.send(JSON.stringify(results));
+    res.status(results.code).send(results.message);  
   });
 });
 /* --------------------------------------------------------- */
@@ -833,7 +875,7 @@ app.post("/webinar_edit", (req, res) => {
 app.post("/webinar_insert", (req, res) => {
   params = req.body;
   pd_webinars.PdWeb_Stud_insert((results) => {
-    res.send(JSON.stringify(results));
+    res.status(results.code).send(results.message);  
   });
 });
 /* --------------------------------------------------------- */
@@ -877,7 +919,7 @@ app.post("/publication_edit", (req, res) => {
 app.post("/publication_insert", (req, res) => {
   params = req.body;
   pd_publications.PdPublica_Stud_insert((results) => {
-    res.send(JSON.stringify(results));
+    res.status(results.code).send(results.message);  
   });
 });
 /* --------------------------------------------------------- */
@@ -965,7 +1007,7 @@ app.post("/Motivational_edit", (req, res) => {
 app.post("/Motivational_insert", (req, res) => {
   params = req.body;
   pd_motivational_talk.PdMotive_Stud_insert((results) => {
-    res.send(JSON.stringify(results));
+    res.status(results.code).send(results.message);  
   });
 });
 /* --------------------------------------------------------- */
@@ -1008,8 +1050,8 @@ app.post("/Miniproj_edit", (req, res) => {
 });
 app.post("/Miniproj_insert", (req, res) => {
   params = req.body;
-  pd_mini_project.PdMini_Stud_insert((results) => {
-    res.send(JSON.stringify(results));
+  pd_mini_project.PdMini_Stud_insert(params, (results) => {
+    res.status(results.code).send(results.message);  
   });
 });
 
@@ -1098,7 +1140,7 @@ app.post("/Industrialv_edit", (req, res) => {
 app.post("/Industrialv_insert", (req, res) => {
   params = req.body;
   pd_industrial_visit.PdIndustry_Stud_insert((results) => {
-    res.send(JSON.stringify(results));
+    res.status(results.code).send(results.message);  
   });
 });
 /* --------------------------------------------------------- */
@@ -1110,12 +1152,37 @@ app.post("/ProfessionalDevelopmentCA", (req, res) => {
   });
 });
 
-/* -------------- GRAPHS -----------------------*/
-app.post("/InternshipGraphCA", (req, res) => {
+app.post("/ProfessionalDevelopmentHOD", (req, res) => {
   params = req.body;
-  charts.GenerateInternshipCharts(params, (results) => {
-    let placement_lst = results.map((item) => {
+  params.batch = "None";
+  student_details.fetch_students_details_pd(params, (results) => {
+    res.send(JSON.stringify(results));
+  });
+});
+
+/* -------------- GRAPHS -----------------------*/
+
+/* -------------- HOD GRAPHS -----------------------*/
+app.post("/InternshipGraphHOD", (req, res) => {
+  params = req.body;
+  charts.GenerateInternshipChartsHOD(params, (results) => {
+    let intern_lst = results.map((item) => {
       return item.intern_count;
+    });
+    let batches = results.map((item) => {
+      return item.batch;
+    });
+
+    res.send(JSON.stringify({ intern_lst: intern_lst, batches: batches }));
+  });
+});
+
+app.post("/PlacementGraphHOD", (req, res) => {
+  params = req.body;
+  params.dept = params.dept.toUpperCase();
+  charts.GeneratePlacementChartsHOD(params, (results) => {
+    let placement_lst = results.map((item) => {
+      return item.placement_count;
     });
     let batches = results.map((item) => {
       return item.batch;
@@ -1126,18 +1193,392 @@ app.post("/InternshipGraphCA", (req, res) => {
   });
 });
 
-// Deployment
-// const PORT = process.env.PORT || 8080;
+app.post("/AcademicsGraphHOD", (req, res) => {
+  params = req.body;
+  params.dept = params.dept.toUpperCase();
+  charts.GenerateAcademicsChartsHOD(params, (results) => {
+    res.send(JSON.stringify({ results }));
+  });
+});
 
-// Dev
+app.post("/AcademicSummaryGraphHOD", (req, res) => {
+  params = req.body;
+  params.dept = params.dept.toUpperCase();
+  charts.GenerateAcademicSummaryChartsHOD(params, (results) => {
+    res.send(JSON.stringify(results));
+  });
+});
+
+/* -------------- Class Advisor GRAPHS -----------------------*/
+app.post("/InternshipGraphCA", (req, res) => {
+  params = req.body;
+  charts.GenerateInternshipChartsCA(params, (results) => {
+    let intern_lst = results.map((item) => {
+      return item.intern_count;
+    });
+    let batches = results.map((item) => {
+      return item.batch;
+    });
+
+    res.send(JSON.stringify({ intern_lst: intern_lst, batches: batches }));
+  });
+});
+
+app.post("/PlacementGraphCA", (req, res) => {
+  params = req.body;
+  params.dept = params.dept.toUpperCase();
+  charts.GeneratePlacementChartsCA(params, (results) => {
+    let placement_lst = results.map((item) => {
+      return item.placement_count;
+    });
+    let batches = results.map((item) => {
+      return item.batch;
+    });
+    res.send(
+      JSON.stringify({ placement_lst: placement_lst, batches: batches })
+    );
+  });
+});
+
+app.post("/AcademicsGraphHOD", (req, res) => {
+  params = req.body;
+  params.dept = params.dept.toUpperCase();
+  charts.GenerateAcademicsChartsCA(params, (results) => {
+    res.send(JSON.stringify(results));
+  });
+});
+
+app.post("/AcademicSummaryGraphHOD", (req, res) => {
+  params = req.body;
+  params.dept = params.dept.toUpperCase();
+  charts.GenerateAcademicSummaryChartsCA(params, (results) => {
+    res.send(JSON.stringify(results));
+  });
+});
+
+/* -------------- Official GRAPHS -----------------------*/
+app.post("/InternshipGraphOfficial", (req, res) => {
+  charts.GenerateInternshipChartsOfficial((results) => {
+    let intern_lst = results.map((item) => {
+      return item.intern_count;
+    });
+    let batches = results.map((item) => {
+      return item.dept;
+    });
+
+    res.send(JSON.stringify({ intern_lst: intern_lst, batches: batches }));
+  });
+});
+
+app.post("/PlacementGraphOfficial", (req, res) => {
+  charts.GeneratePlacementChartsOfficial((results) => {
+    let placement_lst = results.map((item) => {
+      return item.placement_count;
+    });
+    let batches = results.map((item) => {
+      return item.dept;
+    });
+    res.send(
+      JSON.stringify({ placement_lst: placement_lst, batches: batches })
+    );
+  });
+});
+
+app.get("/download_template", (req, res) => {
+  res.download(
+    "./models/template/academic_details.xlsx",
+    "template.xlsx",
+    (err) => {
+      console.log(err);
+    }
+  );
+});
+
+app.get("/download_all/:id", (req, res) => {
+  var file = "./models/template/" + req.params.id;
+  res.download(file, "template.xlsx", (err) => {
+    console.log(err);
+  });
+});
+
+// Admin controls - Create
+app.post("/admin_create_creds", (req, res) => {
+  params = req.body;
+  admin.insert_login_cred(params, (results) => {
+    if (!results) {
+      console.log("error");
+    } else {
+      res.send(results);
+    }
+  });
+});
+
+// Admin controls - Delete
+app.post("/admin_delete_creds", (req, res) => {
+  params = req.body;
+  admin.remove_cred(params, (results) => {
+    if (!results) {
+      console.log("error");
+    } else {
+      res.send(results);
+    }
+  });
+});
+
+// Admin controls - Edit
+app.post("/admin_edit_creds", (req, res) => {
+  params = req.body;
+  admin.edit_cred(params, (results) => {
+    if (!results) {
+      console.log("error");
+    } else {
+      res.send(results);
+    }
+  });
+});
+
+//Admin controls - Display
+app.post("/admin_get_creds", (req, res) => {
+  params = req.body;
+  user_login.get_login_details(params, (results) => {
+    if (!results) {
+      console.log("error");
+    } else {
+      res.send(results);
+    }
+  });
+});
+
+//bulk for pd
+app.post("/bulkforpd", upload.single("file"), (req, res) => {
+  var file_present = req.file;
+  if (!file_present) {
+    res.send("File Not Found (Please Check)");
+  } else {
+    var params = req.body;
+    var req = { path: req.file.path, type: params.value };
+    bkpd.bulkuploadpd(req, (results) => {
+      if (!results) {
+        console.log("error");
+      } else {
+        res.send(results);
+      }
+    });
+  }
+});
+
+//Aptitude edit and delete
+app.post("/aptitude_edit_delete", (req, res) => {
+  params = req.body;
+  if (params.edit == "no") {
+    pd_aptitude.delete_aptitude((results) => {
+      if (!results) {
+        console.log("error");
+      } else {
+        res.send(results);
+      }
+    });
+  } else if (params.edit == "yes") {
+    pd_aptitude.edit_aptitude((results) => {
+      if (!results) {
+        console.log("error");
+      } else {
+        res.send(results);
+      }
+    });
+  } else {
+    res.send("Invalid API call");
+  }
+});
+
+//aptitude ca display
+app.post("/aptitude_cadisplay", (req, res) => {
+  params = req.body;
+  pd_aptitude.get_aptitude((results) => {
+    res.send(JSON.stringify(results));
+  });
+});
+
+//sskills ca display
+app.post("/sskills_cadisplay", (req, res) => {
+  params = req.body;
+  pd_sskills.get_soft_skill((results) => {
+    res.send(JSON.stringify(results));
+  });
+});
+
+//empskills ca display
+app.post("/empskills_cadisplay", (req, res) => {
+  params = req.body;
+  pd_empskills.get_employability_skill((results) => {
+    res.send(JSON.stringify(results));
+  });
+});
+
+//sdiscovery edit and delete
+app.post("/sdiscovery_edit_delete", (req, res) => {
+  params = req.body;
+  if (params.edit == "no") {
+    pd_sdiscovery.delete_sdiscovery((results) => {
+      if (!results) {
+        console.log("error");
+      } else {
+        res.send(results);
+      }
+    });
+  } else if (params.edit == "yes") {
+    pd_sdiscovery.edit_sdiscovery((results) => {
+      if (!results) {
+        console.log("error");
+      } else {
+        res.send(results);
+      }
+    });
+  } else {
+    res.send("Invalid API call");
+  }
+});
+
+//sdiscovery ca display
+app.post("/sdiscovery_cadisplay", (req, res) => {
+  params = req.body;
+  pd_sdiscovery.get_sdiscovery((results) => {
+    res.send(JSON.stringify(results));
+  });
+});
+
+//credits
+app.post("/getcreditsCA", (req, res) => {
+  params = req.body;
+  charts.credits_dataCA(params, (results) => {
+    let json_lst = [];
+
+    for (let i = 0; i < results[0].length; i++) {
+      let json = new Object();
+      json.batch = results[0][i].batch;
+      json.verified = results[0][i].total;
+      json.pending = 0;
+      json_lst.push(json);
+    }
+
+    for (let inx = 0; inx < results[1].length; inx++) {
+      for (let inx1 = 0; inx1 < json_lst.length; inx1++) {
+        if (json_lst[inx1].batch == results[1][inx].batch) {
+          json_lst[inx1].pending = results[1][inx].total;
+        }
+      }
+    }
+
+    res.send(JSON.stringify(json_lst));
+  });
+});
+
+app.post("/getcreditsOfficials", (req, res) => {
+  params = req.body;
+  charts.credits_data_Officials(params, (results) => {
+    let json_lst = [];
+
+    for (let i = 0; i < results[0].length; i++) {
+      let json = new Object();
+      json.dept = results[0][i].dept;
+      json.verified = results[0][i].total;
+      json.pending = 0;
+      json_lst.push(json);
+    }
+
+    for (let inx = 0; inx < results[1].length; inx++) {
+      for (let inx1 = 0; inx1 < json_lst.length; inx1++) {
+        if (json_lst[inx1].dept == results[1][inx].dept) {
+          json_lst[inx1].pending = results[1][inx].total;
+        }
+      }
+    }
+
+    res.send(JSON.stringify(json_lst));
+  });
+});
+
+app.post("/get_credits_student", (req, res) => {
+  let params = req.body;
+  academic_details.get_credits_student(params, (results) => {
+    res.send(JSON.stringify(results));
+  });
+});
+
+app.post("/file_upload_admin", upload1.single("file"), (req, res) => {
+  var file_present = req.file;
+  if (!file_present) {
+    res.send("File Not Found (Please Check)");
+  } else {
+    var req = { path: req.file.path };
+    bkpd.bulkadmin(req, (results) => {
+      if (!results) {
+        console.log("error");
+      } else {
+        res.send(results);
+      }
+    });
+  }
+});
+
+app.post("/sskils_stud_display", (req, res) => {
+  params = req.body;
+  pd_sskills.sskill_Stud_display((results) => {
+    res.send(JSON.stringify(results));
+  });
+});
+
+//sskills edit and delete
+app.post("/skills_edit_delete", (req, res) => {
+  params = req.body;
+  if (params.edit == "no") {
+    pd_sskills.delete_soft_skill((results) => {
+      if (!results) {
+        console.log("error");
+      } else {
+        res.send(results);
+      }
+    });
+  } else if (params.edit == "yes") {
+    pd_sskills.edit_soft_skill((results) => {
+      if (!results) {
+        console.log("error");
+      } else {
+        res.send(results);
+      }
+    });
+  } else {
+    res.send("Invalid API call");
+  }
+});
+
+//sskills edit and delete
+app.post("/eskills_edit_delete", (req, res) => {
+  params = req.body;
+  if (params.edit == "no") {
+    pd_empskills.delete_employability_skill((results) => {
+      if (!results) {
+        console.log("error");
+      } else {
+        res.send(results);
+      }
+    });
+  } else if (params.edit == "yes") {
+    pd_empskills.edit_employability_skill((results) => {
+      if (!results) {
+        console.log("error");
+      } else {
+        res.send(results);
+      }
+    });
+  } else {
+    res.send("Invalid API call");
+  }
+});
+
 const PORT = process.env.PORT || 8080;
 
-// const server = app.listen(PORT,() =>
-//   console.log(`Server running in port :"${PORT}"`)
-// );
-// http://192.168.1.145:80
-
-app.listen(PORT, () => {
+http.listen(PORT, () => {
   console.log(`Server running in port :"${PORT}"`);
 });
 

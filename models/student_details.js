@@ -1,5 +1,6 @@
+/** @format */
+
 const connection = require("../config/dbconfig");
-//B.batch,B.dept,B.quota,B.gender,B.dob,B.father_name,B.mother_name,B.father_mob_no,B.mother_mob_no,B.religion,B.address password
 
 // Fetch Student Details
 function fetch_student_details(params, callback) {
@@ -8,7 +9,6 @@ function fetch_student_details(params, callback) {
     [params.RollNumber],
     (err, results, fields) => {
       if (err) {
-        console.log(err);
         return callback(false);
       }
       return callback(results);
@@ -32,16 +32,29 @@ function fetch_students_details(callback) {
 
 // Fetch All Student Details
 function fetch_students_details_pd(params, callback) {
-  connection.query(
-    "SELECT * FROM `student`.`student_details` WHERE dept=? AND batch = ?",
-    [params.dept, params.batch],
-    (err, results, fields) => {
-      if (err) {
-        return callback(false);
+  if (params.batch != "None") {
+    connection.query(
+      "SELECT * from student_details where (student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_competitions) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_courses) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_final_project) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_guest_lecture) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_industrial_visit) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_inplant_training) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_internship) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_mini_project) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_motivational_talk) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_placement) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_publications) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_webinar) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_workshops)) and dept=? and batch=?;",
+      [params.dept, params.batch],
+      (err, results, fields) => {
+        if (err) {
+          return callback(false);
+        }
+        return callback(results);
       }
-      return callback(results);
-    }
-  );
+    );
+  } else {
+    connection.query(
+      "SELECT * from student_details where (student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_competitions) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_courses) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_final_project) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_guest_lecture) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_industrial_visit) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_inplant_training) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_internship) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_mini_project) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_motivational_talk) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_placement) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_publications) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_webinar) or student_details.roll_no in (SELECT DISTINCT(roll_no) from pd_workshops)) and student_details.dept=?;",
+      [params.dept],
+      (err, results, fields) => {
+        if (err) {
+          return callback(false);
+        }
+        return callback(results);
+      }
+    );
+  }
 }
 
 function fetch_students_details_hod(callback) {
@@ -59,6 +72,28 @@ function fetch_students_details_hod(callback) {
 function fetch_students_details_official(callback) {
   connection.query(
     "SELECT * FROM `student`.`student_details`",
+    (err, results, fields) => {
+      if (err) {
+        return callback(false);
+      }
+      return callback(results);
+    }
+  );
+}
+function fetch_students_details_official_department(callback) {
+  connection.query(
+    "SELECT * FROM `student`.`student_details` GROUP BY `dept` ",
+    (err, results, fields) => {
+      if (err) {
+        return callback(false);
+      }
+      return callback(results);
+    }
+  );
+}
+function fetch_students_details_official_batch(callback) {
+  connection.query(
+    "SELECT * FROM `student`.`student_details` GROUP BY `batch` ",
     (err, results, fields) => {
       if (err) {
         return callback(false);
@@ -239,4 +274,6 @@ module.exports = {
   edit_student_details,
   delete_student_details,
   fetch_students_details_pd,
+  fetch_students_details_official_department,
+  fetch_students_details_official_batch,
 };

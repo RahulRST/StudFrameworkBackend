@@ -98,21 +98,19 @@ function PdMotive_edit(callback) {
 
 function PdMotive_Stud_insert(callback) {
   connection.query(
-    "INSERT INTO pd_motivational_talk(roll_no,topic,date,resource_person,outcome,verified) VALUES(?,?,?,?,?,?)",
+    "INSERT INTO pd_motivational_talk(roll_no,topic,date,resource_person,outcome) VALUES(?,?,?,?,?)",
     [
       params.StudentDetails,
       params.Topic,
       params.DateYear,
       params.Resource,
       params.Outcome,
-      params.status,
     ],
     (err, results, fields) => {
       if (err) {
-        console.log(err);
-        return callback("Not Inserted");
+        return callback({message : "Server Down", code : 500});
       } else {
-        return callback("Inserted");
+        return callback({message : "Success", code : 200});
       }
     }
   );

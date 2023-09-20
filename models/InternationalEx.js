@@ -77,23 +77,24 @@ function InternationalEx_Stud_display_student(callback) {
 
 function InternationalEx_Stud_insert(callback) {
   connection.query(
-    "INSERT INTO international_exposure(roll_no,foreign_campus,duration,project,outcome,personal_development,foreign_language_courses,verified,credits) VALUES(?,?,?,?,?,?,?,?,0)",
+    "INSERT INTO international_exposure(roll_no,foreign_campus,date,duration,project,outcome,personal_development,foreign_language_courses,verified,credits) VALUES(?,?,?,?,?,?,?,?,?,?)",
     [
       params.StudentDetails,
       params.Campus,
       params.DateYear,
+      params.Duration,
       params.Project,
       params.Outcome,
       params.PersD,
-      params.ForLCC || 0,
+      params.ForLCC,
       params.status,
+      null
     ],
     (err, results, fields) => {
       if (err) {
-        console.log(err);
-        return callback("NotInserted");
+        return callback({message : "Server Down", code : 500});
       } else {
-        return callback("Inserted");
+        return callback({message : "Success", code : 200});
       }
     }
   );
@@ -140,7 +141,7 @@ function InternationalEx_Stud_edit(callback) {
 
 function InternationalEx_Stud_verify(callback) {
   connection.query(
-    "UPDATE `international_exposure` SET verified=? WHERE (s_no = ?)",
+    "UPDATE `international_exposure` SET verify=? WHERE (s_no = ?)",
     [params.verify, params.columnid],
     (err, results, fields) => {
       if (err) {

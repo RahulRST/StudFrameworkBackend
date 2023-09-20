@@ -3,13 +3,16 @@
   "version": "1.0.0",
   "description": "Licet Student Framework backend",
   "main": "index.js",
+
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "dev": "npx prisma generate && nodemon index.js",
     "client": "npm run start --prefix client",
-    "prod": "npm run build --prefix client && npm start"
+    "prod": "npm run build --prefix client && npm start",
+    "setup": "npm install && npm install --prefix client"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -18,11 +21,13 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-validator": "^6.4.0",
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.6.1",
-    "read-excel-file": "^5.6.1"
+    "read-excel-file": "^5.6.1",
+    "store": "^2.0.12"
   },
   "devDependencies": {
     "morgan": "^1.10.0",

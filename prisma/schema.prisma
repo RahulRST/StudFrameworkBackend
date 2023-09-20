@@ -1,0 +1,392 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model academic_summary {
+  roll_no               String  @id @db.VarChar(45)
+  attendance_percentage String? @db.VarChar(100)
+  CGPA                  String? @db.VarChar(45)
+  total_credits         String? @db.VarChar(45)
+  placement_eligiblity  String? @db.VarChar(45)
+}
+
+model academics {
+  id      Int     @id @default(autoincrement())
+  roll_no String  @db.VarChar(45)
+  subj_id String  @db.VarChar(255)
+  cat1    String? @db.VarChar(100)
+  cat2    String? @db.VarChar(100)
+}
+
+model ec_club_activity {
+  s_no          Int     @id @default(autoincrement())
+  roll_no       String  @db.VarChar(45)
+  club_name     String? @db.VarChar(45)
+  activity_name String? @db.VarChar(45)
+  date          String? @db.VarChar(45)
+  outcome       String? @db.VarChar(1000)
+  verified      String? @db.VarChar(45)
+  credits       String? @db.VarChar(45)
+}
+
+model ec_culturals {
+  s_no             Int     @id @default(autoincrement())
+  roll_no          String  @db.VarChar(45)
+  event_name       String? @db.VarChar(100)
+  date             String? @db.VarChar(45)
+  position_secures String? @db.VarChar(45)
+  verified         String? @db.VarChar(45)
+  credits          String? @db.VarChar(45)
+}
+
+model ec_outreach {
+  s_no          Int     @id @default(autoincrement())
+  roll_no       String  @db.VarChar(45)
+  activity_name String? @db.VarChar(45)
+  date          String? @db.VarChar(45)
+  outcome       String? @db.VarChar(1000)
+  verified      String? @db.VarChar(45)
+  credits       String? @db.VarChar(45)
+}
+
+model ec_sports {
+  s_no             Int     @id @default(autoincrement())
+  roll_no          String  @db.VarChar(45)
+  sport_name       String? @db.VarChar(45)
+  representation   String? @db.VarChar(45)
+  date             String? @db.VarChar(45)
+  position_secures String? @db.VarChar(45)
+  verified         String? @db.VarChar(100)
+  credits          String? @db.VarChar(45)
+}
+
+model international_exposure {
+  s_no                     Int     @id @default(autoincrement())
+  roll_no                  String  @db.VarChar(45)
+  foreign_campus           String? @db.VarChar(100)
+  date                     String? @db.VarChar(45)
+  duration                 String? @db.VarChar(50)
+  project                  String? @db.VarChar(225)
+  outcome                  String? @db.VarChar(225)
+  personal_development     String? @db.VarChar(225)
+  foreign_language_courses String? @db.VarChar(225)
+  verified                 String? @db.VarChar(100)
+  credits                  String? @db.VarChar(45)
+}
+
+model intl_se_program {
+  roll_no     String  @id @db.VarChar(45)
+  campus_name String? @db.VarChar(45)
+  date        String? @db.VarChar(45)
+  project     String? @db.VarChar(45)
+  fl_pursuing String? @db.VarChar(45)
+  outcome     String? @db.VarChar(1000)
+  verified    String? @db.VarChar(100)
+  credits     String? @db.VarChar(45)
+}
+
+model login_details {
+  email      String  @id @db.VarChar(255)
+  password   String? @db.VarChar(255)
+  auth_token String? @db.VarChar(255)
+  roll_no    String? @db.VarChar(10)
+  dept       String? @db.VarChar(45)
+  batch      String? @db.VarChar(45)
+  user_type  String? @db.VarChar(45)
+}
+
+model pd_aptitude {
+  s_no       Int     @id @default(autoincrement())
+  roll_no    String  @db.VarChar(45)
+  assessment String? @db.VarChar(100)
+  date       String? @db.VarChar(45)
+  remarks    String? @db.VarChar(1000)
+  credits    String? @db.VarChar(45)
+}
+
+model pd_competitions {
+  s_no             Int     @id @default(autoincrement())
+  roll_no          String  @db.VarChar(45)
+  comp_name        String? @db.VarChar(45)
+  comp_type        String? @db.VarChar(45)
+  date             String? @db.VarChar(45)
+  position_secured String? @db.VarChar(255)
+  verified         String? @db.VarChar(100)
+  credits          String? @db.VarChar(45)
+}
+
+model pd_courses {
+  s_no            Int     @id @default(autoincrement())
+  roll_no         String  @db.VarChar(45)
+  course_provider String? @db.VarChar(100)
+  course_name     String? @db.VarChar(100)
+  date            String? @db.VarChar(45)
+  outcome         String? @db.VarChar(1000)
+  verified        String? @db.VarChar(100)
+  credits         String? @db.VarChar(45)
+}
+
+model pd_employability_skill {
+  s_no       Int    @id @default(autoincrement())
+  roll_no    String @db.VarChar(45)
+  tech_skill String @db.VarChar(45)
+  trainer    String @db.VarChar(45)
+  date       String @db.VarChar(45)
+  remarks    String @db.VarChar(1000)
+  credits    String @db.VarChar(45)
+}
+
+model pd_final_project {
+  s_no      Int     @id @default(autoincrement())
+  roll_no   String  @db.VarChar(45)
+  title     String? @db.VarChar(100)
+  objective String? @db.VarChar(1000)
+  outcome   String? @db.VarChar(1000)
+  verified  String? @db.VarChar(100)
+  credits   String? @db.VarChar(45)
+}
+
+model pd_guest_lecture {
+  s_no            Int     @id @default(autoincrement())
+  roll_no         String  @db.VarChar(45)
+  topic           String? @db.VarChar(45)
+  resource_person String? @db.VarChar(45)
+  outcome         String? @db.VarChar(1000)
+  verified        String? @db.VarChar(100)
+  credits         String? @db.VarChar(45)
+}
+
+model pd_industrial_visit {
+  s_no          Int     @id @default(autoincrement())
+  roll_no       String  @db.VarChar(45)
+  industry_name String? @db.VarChar(45)
+  date          String? @db.VarChar(45)
+  outcome       String? @db.VarChar(1000)
+  credits       String? @db.VarChar(45)
+  verified      String? @db.VarChar(45)
+}
+
+model pd_inplant_training {
+  s_no     Int     @id @default(autoincrement())
+  roll_no  String  @db.VarChar(45)
+  industry String? @db.VarChar(45)
+  date     String? @db.VarChar(45)
+  outcome  String? @db.VarChar(1000)
+  verified String? @db.VarChar(45)
+  credits  String? @db.VarChar(45)
+}
+
+model pd_internship {
+  s_no         Int     @id @default(autoincrement())
+  roll_no      String  @db.VarChar(45)
+  company_name String? @db.VarChar(45)
+  duration     String? @db.VarChar(45)
+  date         String? @db.VarChar(45)
+  reference    String? @db.VarChar(255)
+  verified     String? @db.VarChar(45)
+  credits      String? @db.VarChar(45)
+}
+
+model pd_mini_project {
+  s_no          Int     @id @default(autoincrement())
+  roll_no       String  @db.VarChar(45)
+  project_title String? @db.VarChar(100)
+  objective     String? @db.VarChar(1000)
+  outcome       String? @db.VarChar(1000)
+  verified      String? @db.VarChar(45)
+  credits       String? @db.VarChar(45)
+}
+
+model pd_motivational_talk {
+  s_no            Int     @id @default(autoincrement())
+  roll_no         String  @db.VarChar(45)
+  topic           String? @db.VarChar(45)
+  date            String? @db.VarChar(45)
+  resource_person String? @db.VarChar(45)
+  outcome         String? @db.VarChar(1000)
+  verified        String? @db.VarChar(45)
+  credits         String? @db.VarChar(45)
+}
+
+model pd_other_projects {
+  s_no          Int     @id @default(autoincrement())
+  roll_no       String  @db.VarChar(45)
+  project_title String? @db.VarChar(100)
+  date          String? @db.VarChar(45)
+  objective     String? @db.VarChar(1000)
+  outcome       String? @db.VarChar(1000)
+  verified      String? @db.VarChar(45)
+  credits       String? @db.VarChar(45)
+}
+
+model pd_placement {
+  s_no                 Int     @id @default(autoincrement())
+  roll_no              String  @db.VarChar(45)
+  aptitude             String? @db.VarChar(45)
+  skillrack            String? @db.VarChar(45)
+  soft_skills          String? @db.VarChar(45)
+  employability_skills String? @db.VarChar(45)
+  reasoning            String? @db.VarChar(45)
+  technical_training   String? @db.VarChar(45)
+  eligibility          String? @db.VarChar(45)
+  verified             String? @db.VarChar(45)
+  credits              String? @db.VarChar(45)
+}
+
+model pd_publications {
+  s_no            Int     @id @default(autoincrement())
+  roll_no         String  @db.VarChar(45)
+  conf_or_journal String? @db.VarChar(45)
+  name            String? @db.VarChar(45)
+  title           String? @db.VarChar(45)
+  impact_factor   String? @db.VarChar(1000)
+  indexed_in      String? @db.VarChar(1000)
+  verified        String? @db.VarChar(45)
+  credits         String? @db.VarChar(45)
+}
+
+model pd_skillrack {
+  s_no      Int     @id @default(autoincrement())
+  roll_no   String  @db.VarChar(45)
+  component String? @db.VarChar(100)
+  date      String? @db.VarChar(45)
+  remarks   String? @db.VarChar(1000)
+  credits   String? @db.VarChar(45)
+}
+
+model pd_soft_skill {
+  s_no    Int     @id @default(autoincrement())
+  roll_no String  @db.VarChar(45)
+  skill   String? @db.VarChar(45)
+  trainer String? @db.VarChar(100)
+  date    String? @db.VarChar(45)
+  remarks String? @db.VarChar(1000)
+  credits String? @db.VarChar(45)
+}
+
+model pd_system_discovery {
+  s_no       Int     @id @default(autoincrement())
+  roll_no    String  @db.VarChar(45)
+  components String? @db.VarChar(100)
+  date       String? @db.VarChar(45)
+  remarks    String? @db.VarChar(1000)
+  credits    String? @db.VarChar(45)
+}
+
+model pd_webinar {
+  s_no            Int     @id @default(autoincrement())
+  roll_no         String  @db.VarChar(45)
+  topic           String? @db.VarChar(45)
+  resource_person String? @db.VarChar(45)
+  date            String? @db.VarChar(45)
+  outcome         String? @db.VarChar(1000)
+  verified        String? @db.VarChar(45)
+  credits         String? @db.VarChar(45)
+}
+
+model pd_workshops {
+  s_no            Int     @id @default(autoincrement())
+  roll_no         String  @db.VarChar(45)
+  topic           String? @db.VarChar(45)
+  resource_person String? @db.VarChar(45)
+  date            String? @db.VarChar(45)
+  outcome         String? @db.VarChar(1000)
+  verified        String? @db.VarChar(45)
+  credits         String? @db.VarChar(45)
+}
+
+model student_details {
+  roll_no                    String  @id @db.VarChar(45)
+  reg_no                     String? @db.VarChar(45)
+  sname                      String? @db.VarChar(100)
+  aadhar_no                  String? @db.VarChar(20)
+  email                      String? @db.VarChar(225)
+  licet_email                String  @db.VarChar(255)
+  batch                      String? @db.VarChar(45)
+  dept                       String? @db.VarChar(45)
+  quota                      String? @db.VarChar(10)
+  gender                     String? @db.VarChar(10)
+  dob                        String? @db.VarChar(20)
+  nationality                String? @db.VarChar(100)
+  contact_no                 String? @db.VarChar(20)
+  father_name                String? @db.VarChar(50)
+  mother_name                String? @db.VarChar(50)
+  father_mob_no              String? @db.VarChar(20)
+  mother_mob_no              String? @db.VarChar(20)
+  community                  String? @db.VarChar(10)
+  religion                   String? @db.VarChar(50)
+  if_catholic_parish         String? @db.VarChar(225)
+  dalit_catholic_yn          String? @db.VarChar(10)
+  present_address            String? @db.VarChar(500)
+  permanent_address          String? @db.VarChar(300)
+  blood_group                String? @db.VarChar(10)
+  mother_tongue              String? @db.VarChar(100)
+  lang_know                  String? @db.VarChar(300)
+  pan                        String? @db.VarChar(20)
+  father_qualification       String? @db.VarChar(225)
+  mother_qualification       String? @db.VarChar(225)
+  father_occupation          String? @db.VarChar(100)
+  mother_occupation          String? @db.VarChar(100)
+  father_office_address      String? @db.VarChar(300)
+  mother_office_address      String? @db.VarChar(300)
+  father_annual_income       String? @db.VarChar(30)
+  mother_annual_income       String? @db.VarChar(30)
+  father_email               String? @db.VarChar(225)
+  mother_email               String? @db.VarChar(225)
+  guardian_name              String? @db.VarChar(50)
+  guardian_qualification     String? @db.VarChar(225)
+  guardian_occupation        String? @db.VarChar(30)
+  guardian_office_address    String? @db.VarChar(300)
+  guardian_annual_income     String? @db.VarChar(30)
+  guardian_mob_no            String? @db.VarChar(20)
+  guardian_email             String? @db.VarChar(50)
+  no_of_siblings             String? @db.VarChar(10)
+  name_siblings              String? @db.VarChar(225)
+  qualification_siblings     String? @db.VarChar(225)
+  occupation_siblings        String? @db.VarChar(225)
+  alumni_licet_loyola_yn     String? @db.VarChar(10)
+  application_no             String? @db.VarChar(20)
+  date_of_ad                 String? @db.VarChar(20)
+  regular_lateral_rl         String? @db.VarChar(10)
+  dayschl_hosteller_dh       String? @db.VarChar(10)
+  scholarship_name           String? @db.VarChar(100)
+  scholarship_amount         String? @db.VarChar(20)
+  first_graduate_yn          String? @db.VarChar(10)
+  eco_backward_yn            String? @db.VarChar(10)
+  programming_languages      String? @db.VarChar(225)
+  software_proficiency       String? @db.VarChar(225)
+  dept_rel_proficiency       String? @db.VarChar(225)
+  certifications             String? @db.VarChar(225)
+  other_skills               String? @db.VarChar(225)
+  aptitude_analytical_skills String? @db.VarChar(225)
+  communication_skills       String? @db.VarChar(225)
+  social_media_exposure      String? @db.VarChar(225)
+  leadership_skills          String? @db.VarChar(225)
+  other_interpersonal_skills String? @db.VarChar(255)
+  short_term_goal            String? @db.VarChar(225)
+  long_term_goal             String? @db.VarChar(225)
+  membership_name            String? @db.VarChar(100)
+  membership_no              String? @db.VarChar(30)
+  membership_duration        String? @db.VarChar(30)
+  hse_school_name            String? @db.VarChar(225)
+  hse_board                  String? @db.VarChar(100)
+  hse_medium                 String? @db.VarChar(30)
+  hse_sec_lang               String? @db.VarChar(30)
+  hse_group                  String? @db.VarChar(50)
+  hse_marks                  String? @db.VarChar(10)
+  hse_percentage             String? @db.VarChar(10)
+  hse_cutoff                 String? @db.VarChar(10)
+  hse_attempts               String? @db.VarChar(10)
+  sslc_school_name           String? @db.VarChar(225)
+  sslc_board                 String? @db.VarChar(100)
+  sslc_medium                String? @db.VarChar(30)
+  sslc_sec_lang              String? @db.VarChar(30)
+  sslc_marks                 String? @db.VarChar(10)
+  sslc_percentage            String? @db.VarChar(10)
+  sslc_attempts              String? @db.VarChar(3)
+}
